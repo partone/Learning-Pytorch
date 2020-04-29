@@ -101,4 +101,6 @@ for i in range(epochs):
 plt.plot(range(epochs), losses)
 plt.ylabel("Loss")
 plt.xlabel("Epoch")
+
+
 plt.show()
