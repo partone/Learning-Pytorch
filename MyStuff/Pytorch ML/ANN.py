@@ -53,6 +53,7 @@ def printGraphs(dfe):
 
     fig.legend(labels=labels, loc=3, bbox_to_anchor=(1.0,0.85))
     plt.show()
+    
 
 # Target is the y
 X = df.drop('target', axis = 1)
@@ -103,4 +104,63 @@ plt.ylabel("Loss")
 plt.xlabel("Epoch")
 
 
-plt.show()
+#plt.show()
+
+# Now that the model's been trained, it's time to validate it with the test data
+
+# Stops pytorch updating the gradients since we're just testing
+with torch.no_grad():       # Don't run gradient engine
+    y_eval = model.forward(X_test)
+    loss = criterion(y_eval, y_test)
+
+print(loss) # Low loss is good, it means the model is performing well
+
+correct = 0
+
+with torch.no_grad():
+    for i, data in enumerate(X_test):
+        y_val = model.forward(data)
+        
+        # Prints the index of the example, what the model guessed, and whether it was right or wrong
+        print(f"{i + 1} {y_val.argmax().item()} {y_val.argmax().item() == y_test[i]}")
+
+        if y_val.argmax().item() == y_test[i]:
+            correct += 1
+
+print(f"Accuracy: {correct / (i + 1) * 100}%")
+
+
+# Saving the model
+torch.save(model.state_dict(), "irisModel.pt")
+
+# Loading a model
+new_model = Model()
+new_model.load_state_dict(torch.load("irisModel.pt"))
+
+# Saving as a pickle file means it'll contain the entire model class too
+# torch.save(model, "irisModel.pt")
+
+plt.close()
+
+# Classifying a new single example
+mystery_iris = torch.tensor([5.6, 3.7, 2.2, 0.5])   # An imagined real flower
+
+# It's probably the blue one
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10,7))
+fig.tight_layout()
+plots = [(0,1),(2,3),(0,2),(1,3)]
+colors = ['b', 'r', 'g']
+labels = ['Iris setosa','Iris virginica','Iris versicolor']
+for i, ax in enumerate(axes.flat):
+    for j in range(3):
+        x = df.columns[plots[i][0]]
+        y = df.columns[plots[i][1]]
+        ax.scatter(df[df['target']==j][x], df[df['target']==j][y], color=colors[j])
+        ax.set(xlabel=x, ylabel=y)
+        ax.scatter(mystery_iris[plots[i][0]], mystery_iris[plots[i][1]], color = "y")
+
+fig.legend(labels=labels, loc=3, bbox_to_anchor=(1.0,0.85))
+#plt.show()
+
+with torch.no_grad():
+    print(model(mystery_iris))   # It predicts the first class which is correct
