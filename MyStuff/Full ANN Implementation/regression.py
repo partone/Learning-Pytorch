@@ -233,13 +233,13 @@ cont_test = cont_test.type(torch.FloatTensor)
 # Predict on test set
 with torch.no_grad():
     y_val = model(cat_test, cont_test)
-    loss = torch.sqrt(criterion(y_val, y_test))
+    loss = criterion(y_val, y_test)
 
 print(loss)     # Test set loss
 
 for i in range(10):
     diff = y_val[i].item() - y_test[i].item()
-    print(f"{i}: {y_val[i].item():8.2f}\t{y_rest[i].item():8.2f}\t{diff:8.2f}")
+    print(f"{i}: {y_val[i].item():8.2f}\t{y_test[i].item():8.2f}\t{diff:8.2f}")
     
 # Save the model
 torch.save(model.state_dict(), "taxiModel.pt")
